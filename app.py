@@ -3,9 +3,7 @@ import telebot
 from flask import Flask, request
 
 # --- Настройки ---
-# Обязательно установите эти переменные в настройках Render
 TOKEN = os.environ.get('TELEGRAM_TOKEN')
-# ИСПРАВЛЕННАЯ СТРОКА: Берем готовый URL напрямую из Render
 APP_URL = os.environ.get('RENDER_EXTERNAL_URL')
 
 bot = telebot.TeleBot(TOKEN)
@@ -16,11 +14,15 @@ server = Flask(__name__)
 # Обработчик команды /start
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
+    # Диагностическое сообщение
+    print("Получена команда /start")
     bot.reply_to(message, "Привет! Я эхо-бот, работающий на Render. Отправь мне что-нибудь.")
 
 # Обработчик, который повторяет все текстовые сообщения
 @bot.message_handler(func=lambda message: True)
 def echo_all(message):
+    # ДОБАВЛЕНО ДЛЯ ДИАГНОСТИКИ:
+    print(f"Получено сообщение для эхо: '{message.text}'")
     bot.reply_to(message, message.text)
 
 
@@ -38,7 +40,7 @@ def get_message():
 @server.route("/set_webhook")
 def webhook():
     bot.remove_webhook()
-    bot.set_webhook(url=APP_URL + '/' + TOKEN) # Добавляем '/' между адресом и токеном
+    bot.set_webhook(url=APP_URL + '/' + TOKEN)
     return "Webhook установлен!", 200
 
 # Простой маршрут для проверки, что сервер работает
@@ -47,5 +49,4 @@ def index():
     return "Сервер бота запущен!"
 
 if __name__ == "__main__":
-    # Запускает сервер. Render будет делать это по-своему.
     server.run(host="0.0.0.0", port=int(os.environ.get('PORT', 5000)))
