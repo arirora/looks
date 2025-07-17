@@ -5,7 +5,8 @@ from flask import Flask, request
 # --- Настройки ---
 # Обязательно установите эти переменные в настройках Render
 TOKEN = os.environ.get('TELEGRAM_TOKEN')
-APP_URL = f"https://{os.environ.get('RENDER_APP_NAME')}.onrender.com/"
+# ИСПРАВЛЕННАЯ СТРОКА: Берем готовый URL напрямую из Render
+APP_URL = os.environ.get('RENDER_EXTERNAL_URL')
 
 bot = telebot.TeleBot(TOKEN)
 server = Flask(__name__)
@@ -37,7 +38,7 @@ def get_message():
 @server.route("/set_webhook")
 def webhook():
     bot.remove_webhook()
-    bot.set_webhook(url=APP_URL + TOKEN)
+    bot.set_webhook(url=APP_URL + '/' + TOKEN) # Добавляем '/' между адресом и токеном
     return "Webhook установлен!", 200
 
 # Простой маршрут для проверки, что сервер работает
